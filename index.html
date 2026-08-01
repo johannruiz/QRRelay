@@ -168,7 +168,7 @@ h2 { font-size: clamp(38px, 5.5vw, 76px); line-height: .93; margin-top: 17px; }
 .file-ready-copy span { color: var(--muted); font-size: 12px; }
 
 .qr-stage { position: relative; flex: 1; min-width: 0; min-height: 520px; display: grid; place-items: center; padding: clamp(18px, 2.2vw, 34px); background: #000; border-radius: 13px; overflow: hidden; }
-.qr-stage canvas { position: relative; z-index: 1; width: auto; height: auto; max-width: 100%; max-height: 100%; aspect-ratio: 1; display: block; object-fit: contain; background: white; image-rendering: pixelated; }
+.qr-stage canvas { position: relative; z-index: 1; width: auto; height: auto; max-width: 100%; max-height: 100%; display: block; object-fit: contain; background: white; image-rendering: pixelated; }
 .qr-corners i, .scan-guide i { position: absolute; width: 34px; height: 34px; border-color: var(--orange); border-style: solid; }
 .qr-corners i:nth-child(1), .scan-guide i:nth-child(1) { top: 18px; left: 18px; border-width: 1px 0 0 1px; }
 .qr-corners i:nth-child(2), .scan-guide i:nth-child(2) { top: 18px; right: 18px; border-width: 1px 1px 0 0; }
@@ -206,6 +206,10 @@ h2 { font-size: clamp(38px, 5.5vw, 76px); line-height: .93; margin-top: 17px; }
 .segmented small { color: var(--dim); font: 400 9px/1 var(--sans); }
 .segmented input:checked + span { background: var(--orange-soft); color: var(--orange); box-shadow: inset 0 0 0 1px var(--orange); }
 .profile-segmented { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.layout-subgroup { display: grid; gap: 8px; margin-top: 10px; }
+.layout-label { color: var(--muted); font: 600 8px/1 var(--mono); letter-spacing: .1em; }
+.layout-segmented { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.layout-segmented span { min-height: 54px; }
 .custom-profile {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-top: 10px; padding: 10px;
   border: 1px solid rgba(255,84,38,.5); border-radius: 11px; background: rgba(255,84,38,.035);
@@ -239,6 +243,7 @@ h2 { font-size: clamp(38px, 5.5vw, 76px); line-height: .93; margin-top: 17px; }
 .estimate-grid > div { min-height: 76px; padding: 13px; display: flex; flex-direction: column; justify-content: space-between; gap: 9px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .estimate-grid span { color: var(--dim); font: 600 8px/1 var(--mono); letter-spacing: .1em; }
 .estimate-grid strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 18px/1 var(--mono); letter-spacing: -.045em; }
+#sendRateMetric { white-space: normal; font-size: 14px; line-height: 1.2; }
 .plain-note { margin: 15px 0 0; color: var(--dim); font-size: 11px; line-height: 1.5; }
 
 .transfer-strip { margin-top: 16px; border: 1px solid var(--line); border-radius: var(--radius); padding: 21px clamp(18px, 2.5vw, 30px); background: rgba(5,5,5,.84); }
@@ -257,10 +262,10 @@ h2 { font-size: clamp(38px, 5.5vw, 76px); line-height: .93; margin-top: 17px; }
 .scan-glyph { font: 300 75px/1 var(--mono); color: var(--green); }
 .camera-placeholder strong { font: 500 25px/1 var(--mono); }
 .camera-placeholder span:last-child { color: var(--muted); font-size: 13px; }
-.scan-guide { position: absolute; inset: 13%; border: 1px solid rgba(255,255,255,.16); }
+.scan-guide { position: absolute; inset: 8%; border: 1px solid rgba(255,255,255,.16); }
 .scan-guide i { border-color: var(--green); width: 48px; height: 48px; }
 .scan-guide span { position: absolute; bottom: -34px; left: 50%; transform: translateX(-50%); color: var(--green); font: 600 9px/1 var(--mono); letter-spacing: .12em; white-space: nowrap; }
-.scan-line { position: absolute; left: 14%; right: 14%; height: 1px; background: var(--green); box-shadow: 0 0 18px var(--green); animation: scan 2.6s ease-in-out infinite; }
+.scan-line { position: absolute; left: 9%; right: 9%; height: 1px; background: var(--green); box-shadow: 0 0 18px var(--green); animation: scan 2.6s ease-in-out infinite; }
 @keyframes scan { 0%,100% { top: 20%; opacity: .25; } 50% { top: 78%; opacity: .9; } }
 .select-field { display: grid; gap: 8px; }
 .select-field span { color: var(--muted); font: 600 9px/1 var(--mono); letter-spacing: .1em; }
@@ -506,10 +511,19 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
           <fieldset class="settings-group" id="profileFieldset" disabled>
             <legend>DISPLAY MODE</legend>
             <div class="segmented profile-segmented" id="profileSelector">
-              <label><input type="radio" name="profile" value="robust" checked><span>USB WEBCAM<small>8 QR/s · easiest</small></span></label>
-              <label><input type="radio" name="profile" value="balanced"><span>BALANCED<small>14 QR/s · recommended</small></span></label>
-              <label><input type="radio" name="profile" value="fast"><span>FAST<small>20 QR/s · best conditions</small></span></label>
+              <label><input type="radio" name="profile" value="robust" checked><span>USB WEBCAM<small>8 upd/s · easiest</small></span></label>
+              <label><input type="radio" name="profile" value="balanced"><span>BALANCED<small>14 upd/s · recommended</small></span></label>
+              <label><input type="radio" name="profile" value="fast"><span>FAST<small>20 upd/s · best conditions</small></span></label>
               <label><input type="radio" name="profile" value="custom"><span>CUSTOM / LAB<small>all theoretical controls</small></span></label>
+            </div>
+
+            <div class="layout-subgroup">
+              <span class="layout-label">QR CHANNELS</span>
+              <div class="segmented layout-segmented" id="qrLayoutSelector">
+                <label><input type="radio" name="qrChannels" value="1" checked><span>SINGLE<small>1 QR · maximum compatibility</small></span></label>
+                <label><input type="radio" name="qrChannels" value="2"><span>DUAL<small>2 QR · higher throughput</small></span></label>
+                <label><input type="radio" name="qrChannels" value="4"><span>QUAD / LAB<small>4 QR · 4K camera recommended</small></span></label>
+              </div>
             </div>
 
             <div class="custom-profile hidden" id="customProfilePanel">
@@ -519,9 +533,9 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
                 <small>Payload carried by each QR frame</small>
               </div>
               <div class="custom-control">
-                <div><label for="customSpeedInput">QR SPEED</label><output id="customSpeedValue" for="customSpeedInput">20 QR/S</output></div>
+                <div><label for="customSpeedInput">SCREEN RATE</label><output id="customSpeedValue" for="customSpeedInput">20 UPD/S</output></div>
                 <input id="customSpeedInput" type="range" min="1" max="60" step="1" value="20">
-                <small>Limited by display refresh and camera FPS</small>
+                <small>Each update carries 1, 2, or 4 QR frames</small>
               </div>
               <div class="custom-control">
                 <div><label for="customCorrectionInput">ERROR CORRECTION</label><span id="customCorrectionValue">L / 7%</span></div>
@@ -558,7 +572,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
           <div class="estimate-grid">
             <div><span>FILE SIZE</span><strong id="sendSizeMetric">--</strong></div>
             <div><span>EST. TIME</span><strong id="sendTimeMetric">--</strong></div>
-            <div><span>DISPLAY RATE</span><strong id="sendRateMetric">--</strong></div>
+            <div><span>OPTICAL RATE</span><strong id="sendRateMetric">--</strong></div>
             <div><span>PROTECTION</span><strong id="sendProtectionMetric">SHA-256</strong></div>
           </div>
 
@@ -572,9 +586,9 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
         <div class="progress-track"><i id="sendProgressBar"></i></div>
         <div class="live-metrics">
           <span>SESSION <b id="sendSessionMetric">--</b></span>
-          <span>FRAME <b id="sendFrameMetric">0</b></span>
+          <span>QR FRAMES <b id="sendFrameMetric">0</b></span>
           <span>ELAPSED <b id="sendElapsedMetric">00:00</b></span>
-          <span>QR SIZE <b id="sendQrMetric">--</b></span>
+          <span>QR GRID <b id="sendQrMetric">--</b></span>
         </div>
       </section>
     </section>
@@ -585,7 +599,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
           <div class="eyebrow">02. RECEIVE FILE</div>
           <h2 id="receiveTitle">POINT THE CAMERA<br>AT THE QR SCREEN.</h2>
         </div>
-        <p>Keep the full QR code inside the guide. The file is saved only after every integrity check passes.</p>
+        <p>Keep the complete QR or QR grid inside the guide. The file is saved only after every integrity check passes.</p>
       </div>
 
       <div class="dashboard-grid">
@@ -599,7 +613,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
               <strong>CAMERA IS OFF</strong>
               <span>Tap Start Camera. Your browser will ask for permission.</span>
             </div>
-            <div class="scan-guide hidden" id="scanGuide" aria-hidden="true"><i></i><i></i><i></i><i></i><span>KEEP QR INSIDE</span></div>
+            <div class="scan-guide hidden" id="scanGuide" aria-hidden="true"><i></i><i></i><i></i><i></i><span>KEEP QR GRID INSIDE</span></div>
             <div class="scan-line hidden" id="scanLine" aria-hidden="true"></div>
           </div>
           <div class="stage-actions">
@@ -664,7 +678,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
   </dialog>
 
   <footer>
-    <span>QR RELAY / V0.5.0</span>
+    <span>QR RELAY / V0.6.0</span>
     <span>NO CLOUD · NO TRACKING · OPEN SOURCE</span>
   </footer>
 
@@ -1217,6 +1231,58 @@ function sanitizeMimeType(type) {
   const token = "[a-z0-9!#$&^_.+-]";
   const pattern = new RegExp(`^${token}{1,127}/${token}{1,127}$`);
   return pattern.test(normalized) ? normalized : "application/octet-stream";
+}
+
+// @ts-check
+
+const QR_QUIET_ZONE_MODULES = 4;
+const QR_CHANNEL_OPTIONS = Object.freeze([1, 2, 4]);
+
+function normalizeQrChannels(value) {
+  const parsed = Number.parseInt(String(value), 10);
+  return QR_CHANNEL_OPTIONS.includes(parsed) ? parsed : 1;
+}
+
+function qrGridShape(channels) {
+  const count = normalizeQrChannels(channels);
+  return count === 1
+    ? { channels: 1, columns: 1, rows: 1 }
+    : count === 2
+      ? { channels: 2, columns: 2, rows: 1 }
+      : { channels: 4, columns: 2, rows: 2 };
+}
+
+function estimateOpticalBytesPerSecond(blockLength, updatesPerSecond, channels) {
+  const density = Math.max(0, Number(blockLength) || 0);
+  const updates = Math.max(0, Number(updatesPerSecond) || 0);
+  return density * updates * normalizeQrChannels(channels);
+}
+
+function createQrRasterLayout(matrixSize, channels, rasterLimit = 1600) {
+  const modules = Math.max(21, Number.parseInt(String(matrixSize), 10) || 21);
+  const { columns, rows, channels: count } = qrGridShape(channels);
+  const symbolModules = modules + QR_QUIET_ZONE_MODULES * 2;
+  const largestAxis = Math.max(columns, rows) * symbolModules;
+  const moduleScale = Math.max(2, Math.min(16, Math.floor(Math.max(320, rasterLimit) / largestAxis)));
+  const symbolPixels = symbolModules * moduleScale;
+  const cells = Array.from({ length: count }, (_, index) => ({
+    x: (index % columns) * symbolPixels,
+    y: Math.floor(index / columns) * symbolPixels,
+    width: symbolPixels,
+    height: symbolPixels,
+  }));
+  return {
+    channels: count,
+    columns,
+    rows,
+    matrixSize: modules,
+    quietZone: QR_QUIET_ZONE_MODULES,
+    moduleScale,
+    symbolPixels,
+    width: columns * symbolPixels,
+    height: rows * symbolPixels,
+    cells,
+  };
 }
 
 // Vendored QR encoder derived from Kazuhiko Arase's QRCode for JavaScript.
@@ -12822,6 +12888,7 @@ function createPortableDecoderWorker() {
 
 
 
+
 const PROFILES = {
   robust: { label: "USB WEBCAM", blockLength: 320, fps: 8, correctionLevel: "M", factor: 1.5 },
   balanced: { label: "BALANCED", blockLength: 768, fps: 14, correctionLevel: "M", factor: 1.32 },
@@ -12951,6 +13018,8 @@ let senderProfile = PROFILES.robust;
 let senderSessionHex = "";
 let senderEffectiveFps = senderProfile.fps;
 let senderQrSize = 0;
+let senderChannelCount = 1;
+let senderBatchSize = 4;
 let qrResizeObserver = null;
 
 const decoderWorker = createPortableDecoderWorker();
@@ -12968,7 +13037,6 @@ let cameraFrames = 0;
 let decodeAttempts = 0;
 let qrReads = 0;
 let scanFailures = 0;
-let scanRegion = null;
 let pendingEnvelope = null;
 let receiverComplete = false;
 
@@ -13009,7 +13077,7 @@ function bindInterface() {
   fileInput.addEventListener("change", () => { if (fileInput.files?.[0]) selectFile(fileInput.files[0]); });
   clearFileButton.addEventListener("click", clearSelectedFile);
   replaceFileButton.addEventListener("click", () => fileInput.click());
-  document.querySelectorAll('input[name="profile"]').forEach((input) => input.addEventListener("change", () => {
+  document.querySelectorAll('input[name="profile"], input[name="qrChannels"]').forEach((input) => input.addEventListener("change", () => {
     updateCustomProfileUi();
     updateSendEstimate();
   }));
@@ -13157,6 +13225,11 @@ function selectedProfile() {
   return PROFILES[input?.value] || PROFILES.robust;
 }
 
+function selectedQrChannels() {
+  const input = /** @type {HTMLInputElement | null} */ (document.querySelector('input[name="qrChannels"]:checked'));
+  return normalizeQrChannels(input?.value);
+}
+
 function updateCustomProfileUi() {
   const selected = /** @type {HTMLInputElement | null} */ (document.querySelector('input[name="profile"]:checked'));
   customProfilePanel.classList.toggle("hidden", selected?.value !== "custom");
@@ -13170,20 +13243,21 @@ function updateCustomProfileUi() {
   customSpeedInput.value = String(fps);
 
   const qrModules = estimateQrModules(density, correction);
-  const rawBytesPerSecond = density * fps;
+  const channels = selectedQrChannels();
+  const rawBytesPerSecond = estimateOpticalBytesPerSecond(density, fps, channels);
   const densityRatio = density / densityLimit;
-  const risk = fps > 30 || (fps > 24 && densityRatio > 0.75)
+  const risk = channels === 4 || fps > 30 || (fps > 24 && densityRatio > 0.75)
     ? "EXTREME"
-    : densityRatio > 0.82 || fps > 24 ? "HIGH"
+    : channels === 2 || densityRatio > 0.82 || fps > 24 ? "HIGH"
       : densityRatio > 0.6 || fps > 18 ? "MEDIUM" : "LOW";
 
   customDensityValue.value = `${density} B`;
   customDensityValue.textContent = `${density} B`;
-  customSpeedValue.value = `${fps} QR/S`;
-  customSpeedValue.textContent = `${fps} QR/S`;
+  customSpeedValue.value = `${fps} UPD/S`;
+  customSpeedValue.textContent = `${fps} UPD/S`;
   customCorrectionValue.textContent = `${correction} / ${CUSTOM_CORRECTION_STRENGTH[correction]}`;
   customQrMetric.textContent = `${qrModules}×${qrModules}`;
-  customCapacityMetric.textContent = `${formatBytes(rawBytesPerSecond)}/S`;
+  customCapacityMetric.textContent = `${formatBytes(rawBytesPerSecond)}/S · ${channels} CH`;
   customLimitMetric.textContent = `${densityLimit} B · ${CUSTOM_CORRECTION_STRENGTH[correction]} RECOVERY`;
   customRiskMetric.textContent = risk;
   customRiskMetric.dataset.risk = risk.toLowerCase();
@@ -13201,14 +13275,17 @@ function clampInteger(value, minimum, maximum) {
 
 function updateSendEstimate() {
   senderProfile = selectedProfile();
+  senderChannelCount = selectedQrChannels();
   senderEffectiveFps = Math.max(1, Math.min(senderProfile.fps, 60, Math.floor(displayRefreshRate)));
-  sendRateMetric.textContent = `${senderEffectiveFps} QR/S · ${formatBytes(senderProfile.blockLength * senderEffectiveFps)}/S`;
+  const qrFramesPerSecond = senderEffectiveFps * senderChannelCount;
+  const opticalBytesPerSecond = estimateOpticalBytesPerSecond(senderProfile.blockLength, senderEffectiveFps, senderChannelCount);
+  sendRateMetric.textContent = `${qrFramesPerSecond} QR/S · ${formatBytes(opticalBytesPerSecond)}/S`;
   sendProtectionMetric.textContent = encryptToggle.checked ? "AES-256" : "SHA-256";
   if (!selectedFile) return;
   sendSizeMetric.textContent = formatBytes(selectedFile.size);
   const estimatedEnvelope = estimateEnvelopeSize(selectedFile.size, encryptToggle.checked, Math.min(1024, selectedFile.name.length * 4 + 128));
   const blockCount = Math.ceil(estimatedEnvelope / senderProfile.blockLength);
-  const seconds = Math.max(1, Math.ceil((blockCount * senderProfile.factor) / senderEffectiveFps));
+  const seconds = Math.max(1, Math.ceil((blockCount * senderProfile.factor) / qrFramesPerSecond));
   sendTimeMetric.textContent = formatDuration(seconds);
 }
 
@@ -13231,6 +13308,8 @@ async function startSending() {
   senderLastFrameAt = 0;
   senderQrSize = 0;
   senderProfile = selectedProfile();
+  senderChannelCount = selectedQrChannels();
+  senderBatchSize = Math.max(4, senderChannelCount * 2);
   senderEffectiveFps = Math.max(1, Math.min(senderProfile.fps, 60, Math.floor(displayRefreshRate)));
   setSendControlsLocked(true);
   dropZone.classList.add("hidden");
@@ -13291,9 +13370,10 @@ function handleSenderWorkerMessage(event) {
 
 function fillSenderQueue() {
   if (!senderActive || senderGeneration === 0) return;
-  while (senderQueue.length + senderPendingBatches * 3 < 10 && senderPendingBatches < 3) {
+  const targetFrames = Math.max(12, senderChannelCount * 6);
+  while (senderQueue.length + senderPendingBatches * senderBatchSize < targetFrames && senderPendingBatches < 3) {
     senderPendingBatches += 1;
-    senderWorker.postMessage({ type: "generate", count: 3, generation: senderGeneration });
+    senderWorker.postMessage({ type: "generate", count: senderBatchSize, generation: senderGeneration });
   }
 }
 
@@ -13301,12 +13381,12 @@ function senderTick(timestamp) {
   if (!senderActive) return;
   const interval = 1000 / senderEffectiveFps;
   if (!senderPaused && timestamp - senderLastFrameAt >= interval) {
-    const frame = senderQueue.shift();
-    if (frame) {
+    if (senderQueue.length >= senderChannelCount) {
+      const frames = senderQueue.splice(0, senderChannelCount);
       senderLastFrameAt = timestamp;
-      senderFramesShown += 1;
-      senderQrSize = frame.size;
-      renderQr(frame.modules, frame.size);
+      senderFramesShown += frames.length;
+      senderQrSize = frames[0].size;
+      renderQrGrid(frames);
       updateSenderLiveMetrics();
       fillSenderQueue();
     }
@@ -13314,25 +13394,33 @@ function senderTick(timestamp) {
   senderAnimationId = requestAnimationFrame(senderTick);
 }
 
-function renderQr(modules, matrixSize) {
-  const width = qrCanvas.width;
-  const height = qrCanvas.height;
-  const quietZone = 4;
-  const totalModules = matrixSize + quietZone * 2;
-  const scale = Math.max(1, Math.floor(Math.min(width, height) / totalModules));
-  const drawSize = totalModules * scale;
-  const offsetX = Math.floor((width - drawSize) / 2);
-  const offsetY = Math.floor((height - drawSize) / 2);
+function renderQrGrid(frames) {
+  if (!frames.length) return;
+  const matrixSize = frames[0].size;
+  const layout = createQrRasterLayout(matrixSize, frames.length);
+  if (qrCanvas.width !== layout.width) qrCanvas.width = layout.width;
+  if (qrCanvas.height !== layout.height) qrCanvas.height = layout.height;
   qrContext.fillStyle = "#ffffff";
-  qrContext.fillRect(0, 0, width, height);
+  qrContext.fillRect(0, 0, layout.width, layout.height);
   qrContext.fillStyle = "#000000";
   qrContext.beginPath();
-  for (let row = 0; row < matrixSize; row += 1) {
-    for (let column = 0; column < matrixSize; column += 1) {
-      if (modules[row * matrixSize + column]) qrContext.rect(offsetX + (column + quietZone) * scale, offsetY + (row + quietZone) * scale, scale, scale);
+  for (let frameIndex = 0; frameIndex < frames.length; frameIndex += 1) {
+    const frame = frames[frameIndex];
+    const cell = layout.cells[frameIndex];
+    for (let row = 0; row < matrixSize; row += 1) {
+      for (let column = 0; column < matrixSize; column += 1) {
+        if (!frame.modules[row * matrixSize + column]) continue;
+        qrContext.rect(
+          cell.x + (column + layout.quietZone) * layout.moduleScale,
+          cell.y + (row + layout.quietZone) * layout.moduleScale,
+          layout.moduleScale,
+          layout.moduleScale,
+        );
+      }
     }
   }
   qrContext.fill();
+  fitQrCanvas();
 }
 
 function installQrCanvasSizing() {
@@ -13351,25 +13439,31 @@ function fitQrCanvas() {
   const verticalPadding = Number.parseFloat(style.paddingTop) + Number.parseFloat(style.paddingBottom);
   const availableWidth = Math.max(1, qrStage.clientWidth - horizontalPadding);
   const availableHeight = Math.max(1, qrStage.clientHeight - verticalPadding);
-  const size = Math.max(1, Math.floor(Math.min(920, availableWidth, availableHeight)));
-  qrCanvas.style.width = `${size}px`;
-  qrCanvas.style.height = `${size}px`;
+  const scale = Math.min(1, availableWidth / qrCanvas.width, availableHeight / qrCanvas.height);
+  qrCanvas.style.width = `${Math.max(1, Math.floor(qrCanvas.width * scale))}px`;
+  qrCanvas.style.height = `${Math.max(1, Math.floor(qrCanvas.height * scale))}px`;
 }
 
 function renderWaitingCanvas() {
+  const waitingWidth = senderChannelCount === 2 ? 1200 : 900;
+  const waitingHeight = senderChannelCount === 2 ? 600 : 900;
+  if (qrCanvas.width !== waitingWidth) qrCanvas.width = waitingWidth;
+  if (qrCanvas.height !== waitingHeight) qrCanvas.height = waitingHeight;
   qrContext.fillStyle = "#ffffff";
   qrContext.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
   qrContext.fillStyle = "#050505";
   qrContext.font = "600 24px monospace";
   qrContext.textAlign = "center";
   qrContext.fillText("PREPARING TRANSFER", qrCanvas.width / 2, qrCanvas.height / 2);
+  fitQrCanvas();
 }
 
 function updateSenderLiveMetrics() {
   const progress = senderSuggestedFrames > 0 ? Math.min(1, senderFramesShown / senderSuggestedFrames) : 0;
   setSenderProgress(progress);
   sendFrameMetric.textContent = senderFramesShown.toLocaleString("en-US");
-  sendQrMetric.textContent = senderQrSize ? `${senderQrSize}×${senderQrSize}` : "--";
+  const layoutLabel = senderChannelCount === 1 ? "SINGLE" : senderChannelCount === 2 ? "DUAL" : "QUAD / LAB";
+  sendQrMetric.textContent = senderQrSize ? `${layoutLabel} · ${senderChannelCount} × ${senderQrSize}×${senderQrSize}` : "--";
   const elapsed = senderStartedAt ? Math.max(0, (performance.now() - senderStartedAt) / 1000) : 0;
   sendElapsedMetric.textContent = formatClock(elapsed);
   if (progress >= 1) {
@@ -13544,7 +13638,6 @@ async function startCamera() {
     detectionBusy = false;
     lastCameraScanAt = 0;
     scanFailures = 0;
-    scanRegion = null;
     cameraPlaceholder.classList.add("hidden");
     scanGuide.classList.remove("hidden");
     scanLine.classList.remove("hidden");
@@ -13652,7 +13745,7 @@ async function scanCameraFrame(timestamp) {
     // Keep enough pixels per QR module when the code occupies only part of a
     // 1080p webcam frame. The old 760 px cap made dense screen captures fall
     // below the software reader's practical module resolution.
-    const maxDimension = 1280;
+    const maxDimension = 1600;
     const scale = Math.min(1, maxDimension / Math.max(source.width, source.height));
     const drawWidth = Math.max(240, Math.round(source.width * scale));
     const drawHeight = Math.max(240, Math.round(source.height * scale));
@@ -13660,25 +13753,22 @@ async function scanCameraFrame(timestamp) {
     if (captureCanvas.height !== drawHeight) captureCanvas.height = drawHeight;
     captureContext.drawImage(cameraVideo, source.x, source.y, source.width, source.height, 0, 0, drawWidth, drawHeight);
 
-    const result = await detectTransferQr(drawWidth, drawHeight);
-    if (result?.value?.startsWith("DOT2:")) {
-      qrReads += 1;
+    const results = await detectTransferQrs(drawWidth, drawHeight);
+    if (results.length > 0) {
+      qrReads += results.length;
       receiveReadsMetric.textContent = qrReads.toLocaleString("en-US");
-      if (result.box) updateScanRegion(result.box, source, drawWidth, drawHeight);
       scanFailures = 0;
-      decoderWorker.postMessage({ type: "frame", value: result.value });
+      for (const result of results) decoderWorker.postMessage({ type: "frame", value: result.value });
     } else {
       scanFailures += 1;
-      if (scanFailures > 7) scanRegion = null;
       if (qrReads === 0 && decodeAttempts % 10 === 0) {
         cameraState.textContent = "SCANNING — NO QR YET";
         receiveStatusTitle.textContent = "CAMERA ACTIVE";
-        receiveStatusDetail.textContent = `${decodeAttempts.toLocaleString("en-US")} camera frames analyzed at ${drawWidth}×${drawHeight}. Enlarge the QR, use Webcam mode, and keep it centered.`;
+        receiveStatusDetail.textContent = `${decodeAttempts.toLocaleString("en-US")} camera frames analyzed at ${drawWidth}×${drawHeight}. Enlarge the QR grid, use Webcam mode, and keep it centered.`;
       }
     }
   } catch (error) {
     scanFailures += 1;
-    if (scanFailures > 7) scanRegion = null;
     if (decodeAttempts % 10 === 0) {
       receiveStatusTitle.textContent = "SCANNER RETRYING";
       receiveStatusDetail.textContent = error instanceof Error
@@ -13690,12 +13780,19 @@ async function scanCameraFrame(timestamp) {
   }
 }
 
-async function detectTransferQr(width, height) {
+async function detectTransferQrs(width, height) {
+  const results = [];
+  const seen = new Set();
+  const addResult = (value, box = null) => {
+    if (typeof value !== "string" || !value.startsWith("DOT2:") || seen.has(value)) return;
+    seen.add(value);
+    results.push({ value, box });
+  };
+
   if (barcodeDetector) {
     try {
       const codes = await barcodeDetector.detect(captureCanvas);
-      const code = codes.find((item) => typeof item.rawValue === "string" && item.rawValue.startsWith("DOT2:"));
-      if (code) return { value: code.rawValue, box: code.boundingBox || null };
+      for (const code of codes) addResult(code.rawValue, code.boundingBox || null);
     } catch {
       // Some implementations expose BarcodeDetector but fail on canvas input.
       // Fall through to the bundled software reader.
@@ -13713,31 +13810,63 @@ async function detectTransferQr(width, height) {
         tryInvert: true,
         tryDownscale: true,
         tryDenoise: true,
-        maxNumberOfSymbols: 1,
+        maxNumberOfSymbols: 4,
       });
-      const code = codes.find((item) => typeof item.text === "string" && item.text.startsWith("DOT2:"));
-      if (code) return { value: code.text, box: null };
+      for (const code of codes) addResult(code.text, zxingBoundingBox(code.position));
     } catch {
       // Fall through to jsQR if the WebAssembly reader cannot process a frame.
     }
   }
 
-  if (softwareQrDecoder) {
-    image ||= captureContext.getImageData(0, 0, width, height);
-    const code = softwareQrDecoder(image.data, width, height, { inversionAttempts: "dontInvert" });
-    if (code?.data) return { value: code.data, box: jsQrBoundingBox(code.location) };
+  if (softwareQrDecoder && (!wasmQrDecoder || results.length === 0)) {
+    const regions = qrDecodeRegions(width, height);
+    for (const region of regions) {
+      if (results.length >= 4) break;
+      const regionImage = region.x === 0 && region.y === 0 && region.width === width && region.height === height
+        ? (image ||= captureContext.getImageData(0, 0, width, height))
+        : captureContext.getImageData(region.x, region.y, region.width, region.height);
+      const code = softwareQrDecoder(regionImage.data, region.width, region.height, { inversionAttempts: "dontInvert" });
+      if (!code?.data) continue;
+      const box = translateBoundingBox(jsQrBoundingBox(code.location), region.x, region.y);
+      addResult(code.data, box);
+    }
   }
-  return null;
+  return results;
+}
+
+function qrDecodeRegions(width, height) {
+  const halfWidth = Math.floor(width / 2);
+  const halfHeight = Math.floor(height / 2);
+  const overlapX = Math.max(8, Math.floor(width * 0.06));
+  const overlapY = Math.max(8, Math.floor(height * 0.06));
+  return [
+    { x: 0, y: 0, width, height },
+    { x: 0, y: 0, width: Math.min(width, halfWidth + overlapX), height },
+    { x: Math.max(0, halfWidth - overlapX), y: 0, width: width - Math.max(0, halfWidth - overlapX), height },
+    { x: 0, y: 0, width: Math.min(width, halfWidth + overlapX), height: Math.min(height, halfHeight + overlapY) },
+    { x: Math.max(0, halfWidth - overlapX), y: 0, width: width - Math.max(0, halfWidth - overlapX), height: Math.min(height, halfHeight + overlapY) },
+    { x: 0, y: Math.max(0, halfHeight - overlapY), width: Math.min(width, halfWidth + overlapX), height: height - Math.max(0, halfHeight - overlapY) },
+    { x: Math.max(0, halfWidth - overlapX), y: Math.max(0, halfHeight - overlapY), width: width - Math.max(0, halfWidth - overlapX), height: height - Math.max(0, halfHeight - overlapY) },
+  ].filter((region) => region.width >= 120 && region.height >= 120);
+}
+
+function zxingBoundingBox(position) {
+  if (!position || typeof position !== "object") return null;
+  return pointsBoundingBox([position.topLeft, position.topRight, position.bottomRight, position.bottomLeft]);
 }
 
 function jsQrBoundingBox(location) {
   if (!location) return null;
-  const points = [
+  return pointsBoundingBox([
     location.topLeftCorner,
     location.topRightCorner,
     location.bottomRightCorner,
     location.bottomLeftCorner,
-  ].filter((point) => point && Number.isFinite(point.x) && Number.isFinite(point.y));
+  ]);
+}
+
+function pointsBoundingBox(input) {
+  const points = input.filter((point) => point && Number.isFinite(point.x) && Number.isFinite(point.y));
   if (points.length < 3) return null;
   const xs = points.map((point) => point.x);
   const ys = points.map((point) => point.y);
@@ -13746,51 +13875,23 @@ function jsQrBoundingBox(location) {
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 }
 
+function translateBoundingBox(box, offsetX, offsetY) {
+  return box ? { ...box, x: box.x + offsetX, y: box.y + offsetY } : null;
+}
+
 function getCameraSourceRect() {
   const width = cameraVideo.videoWidth || 1280;
   const height = cameraVideo.videoHeight || 720;
-  if (!scanRegion) {
-    // Match the visible 13% scan-guide inset. Restricting the initial search
-    // keeps recursive QR reflections and other browser windows out of jsQR's
-    // finder-pattern search while preserving the camera's native pixels.
-    const insetX = Math.round(width * 0.13);
-    const insetY = Math.round(height * 0.13);
-    return {
-      x: insetX,
-      y: insetY,
-      width: Math.max(240, width - insetX * 2),
-      height: Math.max(240, height - insetY * 2),
-    };
-  }
+  // Keep the whole visible QR grid in the source crop. Locking onto one symbol
+  // would exclude the other Dual or Quad channels after the first read.
+  const insetX = Math.round(width * 0.08);
+  const insetY = Math.round(height * 0.08);
   return {
-    x: clamp(scanRegion.x, 0, width - 1),
-    y: clamp(scanRegion.y, 0, height - 1),
-    width: clamp(scanRegion.width, 120, width - scanRegion.x),
-    height: clamp(scanRegion.height, 120, height - scanRegion.y),
+    x: insetX,
+    y: insetY,
+    width: Math.max(240, width - insetX * 2),
+    height: Math.max(240, height - insetY * 2),
   };
-}
-
-function updateScanRegion(box, source, drawWidth, drawHeight) {
-  if (!box || box.width <= 0 || box.height <= 0) return;
-  const scaleX = source.width / drawWidth;
-  const scaleY = source.height / drawHeight;
-  const raw = {
-    x: source.x + box.x * scaleX,
-    y: source.y + box.y * scaleY,
-    width: box.width * scaleX,
-    height: box.height * scaleY,
-  };
-  const padding = Math.max(raw.width, raw.height) * 0.42;
-  const videoWidth = cameraVideo.videoWidth;
-  const videoHeight = cameraVideo.videoHeight;
-  scanRegion = {
-    x: clamp(raw.x - padding, 0, videoWidth),
-    y: clamp(raw.y - padding, 0, videoHeight),
-    width: clamp(raw.width + padding * 2, 120, videoWidth),
-    height: clamp(raw.height + padding * 2, 120, videoHeight),
-  };
-  if (scanRegion.x + scanRegion.width > videoWidth) scanRegion.width = videoWidth - scanRegion.x;
-  if (scanRegion.y + scanRegion.height > videoHeight) scanRegion.height = videoHeight - scanRegion.y;
 }
 
 function handleDecoderWorkerMessage(event) {
@@ -13967,7 +14068,6 @@ function resetReceiver() {
   decodeAttempts = 0;
   qrReads = 0;
   scanFailures = 0;
-  scanRegion = null;
   receiveRingValue.textContent = "0";
   receiveProgressBar.style.width = "0%";
   receiveSessionMetric.textContent = "--";

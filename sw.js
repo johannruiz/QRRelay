@@ -1,4 +1,4 @@
-const CACHE_NAME = "qr-relay-v0.5.0";
+const CACHE_NAME = "qr-relay-v0.6.0";
 const APP_SHELL = ["./", "./index.html"];
 
 self.addEventListener("install", (event) => {
