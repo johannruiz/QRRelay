@@ -265,6 +265,9 @@ h2 { font-size: clamp(38px, 5.5vw, 76px); line-height: .93; margin-top: 17px; }
 .select-field { display: grid; gap: 8px; }
 .select-field span { color: var(--muted); font: 600 9px/1 var(--mono); letter-spacing: .1em; }
 .select-field select { width: 100%; height: 44px; border: 1px solid var(--line-bright); border-radius: 9px; color: var(--text); background: #070707; padding: 0 12px; }
+.camera-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.camera-settings .camera-device, .camera-actual { grid-column: 1 / -1; }
+.camera-actual { color: var(--green); font: 600 9px/1.35 var(--mono); letter-spacing: .08em; }
 .receive-status { display: grid; grid-template-columns: auto 1fr; gap: 17px; align-items: center; margin: 25px 0 16px; }
 .receive-ring { width: 88px; aspect-ratio: 1; display: flex; align-items: baseline; justify-content: center; padding-top: 31px; border: 1px solid var(--line-bright); border-radius: 50%; font-family: var(--mono); }
 .receive-ring i { font-style: normal; font-size: 26px; letter-spacing: -.07em; }
@@ -380,7 +383,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
   #receiveWorkspace .receive-status { order: 1; margin: 7px 0 10px; }
   #receiveWorkspace .receive-track { order: 2; }
   #receiveWorkspace .receive-metrics { order: 3; margin-top: 12px; }
-  #receiveWorkspace .select-field { order: 4; margin-top: 14px; }
+  #receiveWorkspace .camera-settings { order: 4; margin-top: 14px; }
   #receiveWorkspace .compatibility-note { order: 5; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
   #receiveWorkspace .receive-ring { width: 68px; padding-top: 23px; }
   #receiveWorkspace .receive-ring i { font-size: 23px; }
@@ -506,7 +509,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
           <fieldset class="settings-group" id="profileFieldset" disabled>
             <legend>DISPLAY MODE</legend>
             <div class="segmented profile-segmented" id="profileSelector">
-              <label><input type="radio" name="profile" value="robust" checked><span>USB WEBCAM<small>8 upd/s · easiest</small></span></label>
+              <label><input type="radio" name="profile" value="robust" checked><span>MOBILE CAMERA<small>8 upd/s · easiest</small></span></label>
               <label><input type="radio" name="profile" value="balanced"><span>BALANCED<small>14 upd/s · recommended</small></span></label>
               <label><input type="radio" name="profile" value="fast"><span>FAST<small>20 upd/s · best conditions</small></span></label>
               <label><input type="radio" name="profile" value="custom"><span>CUSTOM / LAB<small>all theoretical controls</small></span></label>
@@ -619,7 +622,12 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
         <aside class="panel control-panel">
           <div class="panel-label"><span>RECEIVER STATUS</span><span class="accent-green">LISTENING</span></div>
 
-          <label class="select-field" for="cameraSelect"><span>CAMERA</span><select id="cameraSelect"><option value="">Automatic rear camera</option></select></label>
+          <div class="camera-settings">
+            <label class="select-field camera-device" for="cameraSelect"><span>CAMERA</span><select id="cameraSelect"><option value="">Automatic rear camera</option></select></label>
+            <label class="select-field" for="cameraResolutionSelect"><span>RESOLUTION</span><select id="cameraResolutionSelect"><option value="auto">Auto</option><option value="720p">1280 × 720</option><option value="1080p" selected>1920 × 1080</option></select></label>
+            <label class="select-field" for="cameraFpsSelect"><span>FRAME RATE</span><select id="cameraFpsSelect"><option value="30" selected>30 FPS</option><option value="60">60 FPS</option></select></label>
+            <span class="camera-actual" id="cameraActualMode">ACTUAL: CAMERA OFF</span>
+          </div>
 
           <div class="receive-status" id="receiveStatusCard">
             <span class="receive-ring"><i id="receiveRingValue">0</i><small>%</small></span>
@@ -671,7 +679,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 20px
   </dialog>
 
   <footer>
-    <span>QR RELAY / V0.8.0</span>
+    <span>QR RELAY / V0.9.0</span>
     <span>NO CLOUD · NO TRACKING · OPEN SOURCE</span>
   </footer>
 
@@ -1368,6 +1376,43 @@ function chooseReceiverScanPlan({ trackedCount, trackedMisses, timestamp, lastFu
     deep,
     minimumInterval: hasTracked && !fullFrame ? 24 : deep ? 80 : 48,
   };
+}
+
+const CAMERA_RESOLUTIONS = Object.freeze({
+  auto: null,
+  "720p": Object.freeze({ width: 1280, height: 720 }),
+  "1080p": Object.freeze({ width: 1920, height: 1080 }),
+});
+
+function normalizeCameraResolution(value) {
+  return Object.hasOwn(CAMERA_RESOLUTIONS, value) ? value : "auto";
+}
+
+function normalizeCameraFps(value) {
+  return Number(value) === 60 ? 60 : 30;
+}
+
+function preferredCameraVideoConstraints({ deviceId = "", resolution = "auto", fps = 30 } = {}) {
+  const dimensions = CAMERA_RESOLUTIONS[normalizeCameraResolution(resolution)];
+  const video = deviceId
+    ? { deviceId: { exact: String(deviceId) } }
+    : { facingMode: { ideal: "environment" } };
+  if (dimensions) {
+    video.width = { ideal: dimensions.width };
+    video.height = { ideal: dimensions.height };
+  }
+  const normalizedFps = normalizeCameraFps(fps);
+  video.frameRate = { ideal: normalizedFps, max: normalizedFps };
+  return video;
+}
+
+function describeCameraSettings(settings = {}, fallbackWidth = 0, fallbackHeight = 0) {
+  const width = Math.round(Number(settings.width) || Number(fallbackWidth) || 0);
+  const height = Math.round(Number(settings.height) || Number(fallbackHeight) || 0);
+  const fps = Number(settings.frameRate);
+  const resolution = width > 0 && height > 0 ? `${width}×${height}` : "resolution unknown";
+  const rate = Number.isFinite(fps) && fps > 0 ? `${fps.toFixed(fps % 1 ? 1 : 0)} FPS` : "FPS not reported";
+  return `${resolution} · ${rate}`;
 }
 
 // Vendored QR encoder derived from Kazuhiko Arase's QRCode for JavaScript.
@@ -13274,8 +13319,9 @@ function createPortableScannerWorker() {
 
 
 
+
 const PROFILES = {
-  robust: { label: "USB WEBCAM", blockLength: 320, fps: 8, correctionLevel: "M", factor: 1.5 },
+  robust: { label: "MOBILE CAMERA", blockLength: 320, fps: 8, correctionLevel: "M", factor: 1.5 },
   balanced: { label: "BALANCED", blockLength: 768, fps: 14, correctionLevel: "M", factor: 1.32 },
   fast: { label: "FAST", blockLength: 1280, fps: 20, correctionLevel: "L", factor: 1.25 },
 };
@@ -13353,6 +13399,9 @@ const startCameraButton = /** @type {HTMLButtonElement} */ (element("startCamera
 const stopCameraButton = /** @type {HTMLButtonElement} */ (element("stopCameraButton"));
 const resetReceiveButton = element("resetReceiveButton");
 const cameraSelect = /** @type {HTMLSelectElement} */ (element("cameraSelect"));
+const cameraResolutionSelect = /** @type {HTMLSelectElement} */ (element("cameraResolutionSelect"));
+const cameraFpsSelect = /** @type {HTMLSelectElement} */ (element("cameraFpsSelect"));
+const cameraActualMode = element("cameraActualMode");
 const receiveRingValue = element("receiveRingValue");
 const receiveStatusTitle = element("receiveStatusTitle");
 const receiveStatusDetail = element("receiveStatusDetail");
@@ -13421,6 +13470,8 @@ let videoFrameRequestId = 0;
 let animationFrameRequestId = 0;
 let lastCameraScanAt = 0;
 let cameraFrames = 0;
+let cameraFrameTimes = [];
+let lastCameraModeUpdateAt = 0;
 let decodeAttempts = 0;
 let qrReads = 0;
 let scanFailures = 0;
@@ -13493,9 +13544,9 @@ function bindInterface() {
   });
   stopCameraButton.addEventListener("click", stopCamera);
   resetReceiveButton.addEventListener("click", resetReceiver);
-  cameraSelect.addEventListener("change", async () => {
-    if (cameraRunning) { await stopCamera(); await startCamera(); }
-  });
+  for (const control of [cameraSelect, cameraResolutionSelect, cameraFpsSelect]) {
+    control.addEventListener("change", restartCameraForSettings);
+  }
   receiveAnotherButton.addEventListener("click", async () => { resetReceiver(); await startCamera(); });
 
   for (const button of document.querySelectorAll("[data-toggle-password]")) {
@@ -14023,6 +14074,7 @@ async function startCamera() {
     cameraVideo.setAttribute("playsinline", "");
     cameraVideo.muted = true;
     await cameraVideo.play();
+    updateActualCameraMode();
 
     if (!barcodeDetector && !wasmQrDecoder && !softwareQrDecoder) {
       throw new Error("The QR reader is missing from this build. Rebuild and redeploy the published artifact.");
@@ -14037,6 +14089,8 @@ async function startCamera() {
     lastFullFrameScanAt = 0;
     lastDeepScanAt = 0;
     lastScanPlanLabel = "GLOBAL";
+    cameraFrameTimes = [];
+    lastCameraModeUpdateAt = 0;
     cameraPlaceholder.classList.add("hidden");
     startCameraButton.classList.add("hidden");
     stopCameraButton.classList.remove("hidden");
@@ -14060,27 +14114,20 @@ async function startCamera() {
 
 async function requestCameraStream() {
   const selectedDevice = cameraSelect.value;
+  const resolution = normalizeCameraResolution(cameraResolutionSelect.value);
+  const fps = normalizeCameraFps(cameraFpsSelect.value);
   const attempts = [];
   if (selectedDevice) {
     attempts.push({
       audio: false,
-      video: {
-        deviceId: { exact: selectedDevice },
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        frameRate: { ideal: 30, max: 60 },
-      },
+      video: preferredCameraVideoConstraints({ deviceId: selectedDevice, resolution, fps }),
     });
   }
   attempts.push({
     audio: false,
-    video: {
-      facingMode: { ideal: "environment" },
-      width: { ideal: 1920 },
-      height: { ideal: 1080 },
-      frameRate: { ideal: 30, max: 60 },
-    },
+    video: preferredCameraVideoConstraints({ resolution, fps }),
   });
+  attempts.push({ audio: false, video: preferredCameraVideoConstraints({ resolution: "auto", fps }) });
   attempts.push({ audio: false, video: true });
 
   let lastError = null;
@@ -14105,6 +14152,9 @@ async function stopCamera() {
   for (const track of cameraStream?.getTracks?.() || []) track.stop();
   cameraStream = null;
   cameraVideo.srcObject = null;
+  cameraFrameTimes = [];
+  lastCameraModeUpdateAt = 0;
+  cameraActualMode.textContent = "ACTUAL: CAMERA OFF";
   cameraPlaceholder.classList.remove("hidden");
   stopCameraButton.classList.add("hidden");
   if (!receiverComplete) {
@@ -14126,6 +14176,7 @@ function scheduleCameraFrame() {
 
 async function scanCameraFrame(timestamp) {
   cameraFrames += 1;
+  recordActualCameraFps(timestamp);
   const plan = chooseReceiverScanPlan({
     trackedCount: trackedQrBoxes.length,
     trackedMisses: trackedScanMisses,
@@ -14171,7 +14222,7 @@ async function scanCameraFrame(timestamp) {
       if (qrReads === 0 && decodeAttempts % 10 === 0) {
         cameraState.textContent = "SCANNING — NO QR YET";
         receiveStatusTitle.textContent = "CAMERA ACTIVE";
-        receiveStatusDetail.textContent = `${decodeAttempts.toLocaleString("en-US")} ${lastScanPlanLabel.toLowerCase()} scans at ${drawWidth}×${drawHeight}. Keep the complete QR grid visible and use Webcam mode if needed.`;
+        receiveStatusDetail.textContent = `${decodeAttempts.toLocaleString("en-US")} ${lastScanPlanLabel.toLowerCase()} scans at ${drawWidth}×${drawHeight}. Keep the complete QR grid visible and use Mobile Camera mode if needed.`;
       }
     }
   } catch (error) {
@@ -14185,6 +14236,31 @@ async function scanCameraFrame(timestamp) {
   } finally {
     detectionBusy = false;
   }
+}
+
+async function restartCameraForSettings() {
+  if (!cameraRunning) return;
+  await stopCamera();
+  await startCamera();
+}
+
+function updateActualCameraMode(measuredFps = 0) {
+  const track = cameraStream?.getVideoTracks?.()[0];
+  const settings = track?.getSettings?.() || {};
+  const reported = measuredFps > 0 ? { ...settings, frameRate: measuredFps } : settings;
+  cameraActualMode.textContent = `ACTUAL: ${describeCameraSettings(reported, cameraVideo.videoWidth, cameraVideo.videoHeight).toUpperCase()}`;
+}
+
+function recordActualCameraFps(timestamp) {
+  if (typeof cameraVideo.requestVideoFrameCallback !== "function") return;
+  cameraFrameTimes.push(timestamp);
+  if (cameraFrameTimes.length > 31) cameraFrameTimes.shift();
+  if (cameraFrameTimes.length < 15 || timestamp - lastCameraModeUpdateAt < 1000) return;
+  const duration = cameraFrameTimes.at(-1) - cameraFrameTimes[0];
+  if (duration <= 0) return;
+  const measuredFps = (cameraFrameTimes.length - 1) * 1000 / duration;
+  lastCameraModeUpdateAt = timestamp;
+  updateActualCameraMode(measuredFps);
 }
 
 async function detectTransferQrs(width, height, { regions = null, deep = false } = {}) {
@@ -14497,7 +14573,7 @@ function friendlyCameraError(error) {
   }
   if (name === "NotFoundError" || name === "DevicesNotFoundError") return "No camera was found on this device.";
   if (name === "NotReadableError" || name === "TrackStartError") return "The camera is busy in another app or browser tab.";
-  if (name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError") return "The selected camera mode is not supported. Choose Automatic and try again.";
+  if (name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError") return "The selected camera mode is not supported. Choose Auto resolution or 30 FPS and try again.";
   if (!window.isSecureContext) return "Camera access requires a secure HTTPS address.";
   if (error instanceof Error && error.message) return error.message;
   return "The camera could not start. Check site and system camera permissions, then try again.";
