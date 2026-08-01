@@ -1,0 +1,8 @@
+.DS_Store
+Thumbs.db
+.cert/
+coverage/
+*.log
+vendor/jsQR.js
+index.html
+dist/

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <meta name="description" content="Transfer any file from one screen to another camera without uploading it.">
+  <title>QR Relay</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="QR Relay home">
+      <span class="brand-mark">Q/R</span>
+      <span><strong>QR RELAY</strong><small>OPTICAL FILE TRANSFER</small></span>
+    </a>
+  </header>
+
+  <main class="app-shell">
+    <section class="mode-gate" id="modeGate" aria-labelledby="modeTitle">
+      <div class="eyebrow">01. START A TRANSFER</div>
+      <div class="mode-intro">
+        <div>
+          <h1 id="modeTitle">MOVE A FILE<br><span>THROUGH LIGHT.</span></h1>
+          <p>Choose what this device should do. Nothing is uploaded, paired, or sent to a cloud service.</p>
+        </div>
+        <div class="mode-stat" aria-label="How it works">
+          <strong>SCREEN → CAMERA</strong>
+          <span>Any file type</span>
+          <span>No account</span>
+          <span>Offline after first visit</span>
+        </div>
+      </div>
+      <div class="mode-cards">
+        <button class="mode-card send-card" type="button" data-mode="send">
+          <span class="mode-number">01</span>
+          <span class="mode-icon" aria-hidden="true">↗</span>
+          <strong>SEND A FILE</strong>
+          <small>Show moving QR codes on this screen.</small>
+          <span class="mode-action">CHOOSE SEND <b>→</b></span>
+        </button>
+        <button class="mode-card receive-card" type="button" data-mode="receive">
+          <span class="mode-number">02</span>
+          <span class="mode-icon" aria-hidden="true">⌁</span>
+          <strong>RECEIVE A FILE</strong>
+          <small>Point this device's camera at the sender.</small>
+          <span class="mode-action">CHOOSE RECEIVE <b>→</b></span>
+        </button>
+      </div>
+    </section>
+
+    <nav class="mode-switch hidden" id="modeSwitch" aria-label="Transfer mode">
+      <span class="switch-label">MODE</span>
+      <button type="button" data-mode="send">SEND</button>
+      <button type="button" data-mode="receive">RECEIVE</button>
+      <button class="switch-reset" type="button" id="chooseModeButton">CHOOSE AGAIN</button>
+    </nav>
+
+    <section class="workspace hidden" id="sendWorkspace" aria-labelledby="sendTitle">
+      <div class="workspace-heading">
+        <div>
+          <div class="eyebrow">02. SEND FILE</div>
+          <h2 id="sendTitle">SHOW THE FILE<br>ON THIS SCREEN.</h2>
+        </div>
+        <p>The receiving device only needs to see the QR animation. Keep this screen still and bright.</p>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="panel stage-panel">
+          <div class="panel-label"><span>OPTICAL OUTPUT</span><span id="sendStageState">WAITING FOR FILE</span></div>
+
+          <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-controls="fileInput">
+            <input id="fileInput" type="file" hidden>
+            <span class="drop-cross" aria-hidden="true">＋</span>
+            <strong>DROP ANY FILE HERE</strong>
+            <span>or click to choose from this device</span>
+            <small>PDF, images, audio, video, archives, documents, and more · up to 128 MiB</small>
+          </div>
+
+          <div class="file-ready-stage hidden" id="fileReadyStage" aria-live="polite">
+            <span class="file-ready-icon" aria-hidden="true"><i id="fileReadyGlyph">FILE</i></span>
+            <div class="file-ready-copy">
+              <small>ATTACHED FILE · READY TO DISPLAY</small>
+              <strong id="fileReadyName">NO FILE SELECTED</strong>
+              <span id="fileReadyMeta">Choose a file to continue</span>
+            </div>
+            <button class="button secondary" id="replaceFileButton" type="button">CHOOSE ANOTHER</button>
+          </div>
+
+          <div class="qr-stage hidden" id="qrStage">
+            <canvas id="qrCanvas" width="920" height="920" aria-label="Animated QR transfer"></canvas>
+            <div class="qr-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          </div>
+
+          <div class="stage-actions hidden" id="sendStageActions">
+            <button class="button secondary" id="pauseSendButton" type="button">PAUSE</button>
+            <button class="button secondary" id="fullscreenButton" type="button">FULL SCREEN</button>
+            <button class="button danger" id="cancelSendButton" type="button">STOP</button>
+          </div>
+        </section>
+
+        <aside class="panel control-panel">
+          <div class="panel-label"><span>TRANSFER SETUP</span><span class="accent-orange">SENDER</span></div>
+
+          <div class="file-card empty" id="sendFileCard">
+            <span class="file-glyph" id="sendFileGlyph">--</span>
+            <div><strong id="sendFileName">NO FILE SELECTED</strong><span id="sendFileMeta">Choose a file to continue</span></div>
+            <button class="icon-button hidden" id="clearFileButton" type="button" aria-label="Remove selected file">×</button>
+          </div>
+
+          <fieldset class="settings-group" id="profileFieldset" disabled>
+            <legend>DISPLAY MODE</legend>
+            <div class="segmented profile-segmented" id="profileSelector">
+              <label><input type="radio" name="profile" value="robust" checked><span>USB WEBCAM<small>8 QR/s · easiest</small></span></label>
+              <label><input type="radio" name="profile" value="balanced"><span>BALANCED<small>14 QR/s · recommended</small></span></label>
+              <label><input type="radio" name="profile" value="fast"><span>FAST<small>20 QR/s · best conditions</small></span></label>
+              <label><input type="radio" name="profile" value="custom"><span>CUSTOM / LAB<small>all theoretical controls</small></span></label>
+            </div>
+
+            <div class="custom-profile hidden" id="customProfilePanel">
+              <div class="custom-control">
+                <div><label for="customDensityInput">QR DENSITY</label><output id="customDensityValue" for="customDensityInput">1280 B</output></div>
+                <input id="customDensityInput" type="range" min="128" max="2171" step="1" value="1280">
+                <small>Payload carried by each QR frame</small>
+              </div>
+              <div class="custom-control">
+                <div><label for="customSpeedInput">QR SPEED</label><output id="customSpeedValue" for="customSpeedInput">20 QR/S</output></div>
+                <input id="customSpeedInput" type="range" min="1" max="60" step="1" value="20">
+                <small>Limited by display refresh and camera FPS</small>
+              </div>
+              <div class="custom-control">
+                <div><label for="customCorrectionInput">ERROR CORRECTION</label><span id="customCorrectionValue">L / 7%</span></div>
+                <select id="customCorrectionInput">
+                  <option value="L" selected>L · 7% recovery · highest density</option>
+                  <option value="M">M · 15% recovery</option>
+                  <option value="Q">Q · 25% recovery</option>
+                  <option value="H">H · 30% recovery · lowest density</option>
+                </select>
+                <small>Higher recovery automatically reduces maximum density</small>
+              </div>
+              <div class="custom-theory" aria-live="polite">
+                <div><span>QR MODULES</span><strong id="customQrMetric">141×141</strong></div>
+                <div><span>RAW CAPACITY</span><strong id="customCapacityMetric">25 KiB/S</strong></div>
+                <div><span>DENSITY LIMIT</span><strong id="customLimitMetric">2171 B · 7% RECOVERY</strong></div>
+                <div><span>OPTICAL RISK</span><strong id="customRiskMetric" data-risk="medium">MEDIUM</strong></div>
+              </div>
+              <p>LAB values describe theoretical output. Camera resolution, exposure, monitor refresh and rolling shutter determine the usable rate.</p>
+            </div>
+          </fieldset>
+
+          <fieldset class="settings-group" id="securityFieldset" disabled>
+            <legend>PRIVACY</legend>
+            <label class="check-row">
+              <input type="checkbox" id="encryptToggle">
+              <span><strong>Protect with a passphrase</strong><small>Uses AES-256-GCM. The passphrase is never shown in the QR codes.</small></span>
+            </label>
+            <div class="password-row hidden" id="sendPasswordRow">
+              <label for="sendPassphrase">PASSPHRASE</label>
+              <div class="password-control"><input id="sendPassphrase" type="password" minlength="10" maxlength="256" autocomplete="new-password" placeholder="10+ characters"><button type="button" data-toggle-password="sendPassphrase">SHOW</button></div>
+            </div>
+          </fieldset>
+
+          <div class="estimate-grid">
+            <div><span>FILE SIZE</span><strong id="sendSizeMetric">--</strong></div>
+            <div><span>EST. TIME</span><strong id="sendTimeMetric">--</strong></div>
+            <div><span>DISPLAY RATE</span><strong id="sendRateMetric">--</strong></div>
+            <div><span>PROTECTION</span><strong id="sendProtectionMetric">SHA-256</strong></div>
+          </div>
+
+          <button class="button primary full" id="startSendButton" type="button" disabled>START DISPLAY</button>
+          <p class="plain-note" id="sendHelp">Choose a file first. The sender cannot know when the other device has finished, so stop after the receiver confirms.</p>
+        </aside>
+      </div>
+
+      <section class="transfer-strip hidden" id="sendTransferStrip" aria-live="polite">
+        <div class="strip-head"><span id="sendStatusText">BROADCASTING FILE</span><strong id="sendProgressText">0%</strong></div>
+        <div class="progress-track"><i id="sendProgressBar"></i></div>
+        <div class="live-metrics">
+          <span>SESSION <b id="sendSessionMetric">--</b></span>
+          <span>FRAME <b id="sendFrameMetric">0</b></span>
+          <span>ELAPSED <b id="sendElapsedMetric">00:00</b></span>
+          <span>QR SIZE <b id="sendQrMetric">--</b></span>
+        </div>
+      </section>
+    </section>
+
+    <section class="workspace hidden" id="receiveWorkspace" aria-labelledby="receiveTitle">
+      <div class="workspace-heading">
+        <div>
+          <div class="eyebrow">02. RECEIVE FILE</div>
+          <h2 id="receiveTitle">POINT THE CAMERA<br>AT THE QR SCREEN.</h2>
+        </div>
+        <p>Keep the full QR code inside the guide. The file is saved only after every integrity check passes.</p>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="panel stage-panel camera-panel">
+          <div class="panel-label"><span>CAMERA INPUT</span><span id="cameraState">CAMERA OFF</span></div>
+          <div class="camera-stage" id="cameraStage">
+            <video id="cameraVideo" playsinline muted autoplay></video>
+            <canvas id="captureCanvas" class="hidden" width="960" height="720"></canvas>
+            <div class="camera-placeholder" id="cameraPlaceholder">
+              <span class="scan-glyph" aria-hidden="true">⌗</span>
+              <strong>CAMERA IS OFF</strong>
+              <span>Tap Start Camera. Your browser will ask for permission.</span>
+            </div>
+            <div class="scan-guide hidden" id="scanGuide" aria-hidden="true"><i></i><i></i><i></i><i></i><span>KEEP QR INSIDE</span></div>
+            <div class="scan-line hidden" id="scanLine" aria-hidden="true"></div>
+          </div>
+          <div class="stage-actions">
+            <button class="button primary" id="startCameraButton" type="button">START CAMERA</button>
+            <button class="button secondary hidden" id="stopCameraButton" type="button">STOP CAMERA</button>
+            <button class="button danger" id="resetReceiveButton" type="button">START OVER</button>
+          </div>
+        </section>
+
+        <aside class="panel control-panel">
+          <div class="panel-label"><span>RECEIVER STATUS</span><span class="accent-green">LISTENING</span></div>
+
+          <label class="select-field" for="cameraSelect"><span>CAMERA</span><select id="cameraSelect"><option value="">Automatic rear camera</option></select></label>
+
+          <div class="receive-status" id="receiveStatusCard">
+            <span class="receive-ring"><i id="receiveRingValue">0</i><small>%</small></span>
+            <div><strong id="receiveStatusTitle">READY TO SCAN</strong><span id="receiveStatusDetail">Start the camera on this device.</span></div>
+          </div>
+
+          <div class="progress-track receive-track"><i id="receiveProgressBar"></i></div>
+
+          <div class="estimate-grid receive-metrics">
+            <div><span>SESSION</span><strong id="receiveSessionMetric">--</strong></div>
+            <div><span>QR READS</span><strong id="receiveReadsMetric">0</strong></div>
+            <div><span>NEW FRAMES</span><strong id="receiveFramesMetric">0</strong></div>
+            <div><span>DAMAGED</span><strong id="receiveDamagedMetric">0</strong></div>
+          </div>
+
+          <div class="compatibility-note" id="compatibilityNote">
+            <strong>BROWSER CHECK</strong>
+            <span id="compatibilityText">Checking camera permission and local QR reader…</span>
+          </div>
+        </aside>
+      </div>
+
+      <section class="result-panel hidden" id="resultPanel" aria-live="polite">
+        <div class="result-copy">
+          <div class="eyebrow accent-green">03. TRANSFER VERIFIED</div>
+          <h3 id="resultName">RECEIVED FILE</h3>
+          <p id="resultMeta">The file passed its SHA-256 integrity check.</p>
+          <div class="result-hash"><span>SHA-256</span><code id="resultHash">--</code></div>
+          <div class="result-actions">
+            <a class="button primary green-button" id="downloadLink" href="#" download>DOWNLOAD FILE</a>
+            <button class="button secondary" id="receiveAnotherButton" type="button">RECEIVE ANOTHER</button>
+          </div>
+        </div>
+        <div class="preview" id="resultPreview"><span>NO PREVIEW AVAILABLE</span></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="passphraseDialog" class="passphrase-dialog">
+    <form method="dialog" id="passphraseForm">
+      <div class="eyebrow accent-orange">PROTECTED TRANSFER</div>
+      <h3>ENTER THE PASSPHRASE</h3>
+      <p>The sender protected this file. The passphrase stays on this device and is used only to unlock the received data.</p>
+      <label for="receivePassphrase">PASSPHRASE</label>
+      <div class="password-control"><input id="receivePassphrase" type="password" maxlength="256" autocomplete="current-password" required><button type="button" data-toggle-password="receivePassphrase">SHOW</button></div>
+      <p class="dialog-error hidden" id="passphraseError"></p>
+      <div class="dialog-actions"><button class="button secondary" value="cancel">CANCEL</button><button class="button primary" id="unlockButton" value="default">UNLOCK FILE</button></div>
+    </form>
+  </dialog>
+
+  <footer>
+    <span>QR RELAY / V0.5.0</span>
+    <span>NO CLOUD · NO TRACKING · OPEN SOURCE</span>
+  </footer>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

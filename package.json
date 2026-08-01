@@ -1,0 +1,18 @@
+{
+  "name": "qr-relay",
+  "version": "0.5.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline-capable screen-to-camera file transfer through animated QR codes.",
+  "scripts": {
+    "vendor": "node tools/fetch-vendor.mjs",
+    "build": "node tools/build-portable.mjs",
+    "check": "node tools/check.mjs",
+    "test": "node --test",
+    "verify": "npm run build && npm run check && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
