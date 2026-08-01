@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "WebWorker"],
+    "strict": true,
+    "allowJs": true,
+    "noEmit": true
+  },
+  "include": ["src/**/*.js", "vendor/qrcode.js"]
+}
